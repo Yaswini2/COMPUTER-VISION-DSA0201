@@ -1,0 +1,20 @@
+from google.colab import files
+uploaded = files.upload()
+
+!pip install opencv-python-headless
+
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+
+filename = list(uploaded.keys())[0]
+
+image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+
+plt.subplot(1, 2, 2)
+plt.imshow(edges, cmap='gray')
+plt.title('Canny Edge Detection')
+plt.axis('off')
+
+plt.tight_layout()
+plt.show()
