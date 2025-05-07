@@ -1,0 +1,10 @@
+import cv2
+import numpy as np
+img = cv2.imread(r"C:\\Users\\SAIL\\Downloads\\Hidden\\download.webp")
+h, w = img.shape[:2]
+H = np.array([[10, 20, 0.10],
+              [30, 10, 5.0],
+              [10, 3, 0.1]])
+warped = cv2.warpPerspective(img, H, (w, h))
+cv2.imshow("Original", img)
+cv2.imshow("transformed", warped)
