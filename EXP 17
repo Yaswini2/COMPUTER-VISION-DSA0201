@@ -1,0 +1,8 @@
+import cv2
+import numpy as np
+img = cv2.imread(r"C:\\Users\\SAIL\\Downloads\\Hidden\\download.webp")
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+sobel_x = cv2.convertScaleAbs(sobel_x)
+cv2.imshow("Original Image", img)
+cv2.imshow("Sobel Edge X", sobel_x)
