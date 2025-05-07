@@ -1,0 +1,13 @@
+import numpy as np
+import cv2
+img = cv2.imread(r"C:\\Users\\SAIL\\Downloads\\Hidden\\download.webp")
+h, w = img.shape[:2]
+points1 = np.array([[100, 150], [200, 150], [100, 250], [200, 250]])  
+points2 = np.array([[120, 180], [220, 180], [120, 280], [220, 280]])  
+H, _ = cv2.findHomography(points1, points2)
+output_size = (w * 4, h * 4)  
+warped = cv2.warpPerspective(img, H, output_size)
+cv2.imshow("Original", img)
+cv2.imshow("Warped", warped)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
