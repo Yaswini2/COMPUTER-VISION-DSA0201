@@ -1,0 +1,10 @@
+import cv2
+import numpy as np
+img = cv2.imread(r"C:\\Users\\SAIL\\Downloads\\Hidden\\download.webp")
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+sobel_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+mag = cv2.magnitude(sobel_x, sobel_y)
+edges_xy = cv2.convertScaleAbs(mag)
+cv2.imshow("Original", img)
+cv2.imshow("Sobel XY Edges", edges_xy)
