@@ -1,0 +1,62 @@
+import cv2
+import mediapipe as mp
+import numpy as np
+
+# === INPUT FILES ===
+PERSON_IMAGE_PATH = "C:\\Users\\SAIL\\Downloads\\Jim-Parsons-PNG-HD.png"     # Person image
+SHIRT_IMAGE_PATH = "C:\\Users\\SAIL\\Downloads\\Dress-Shirt-PNG-File-Download-Free.png"       # Shirt (must be PNG with transparency)
+
+# === INIT MEDIAPIPE ===
+mp_pose = mp.solutions.pose
+pose = mp_pose.Pose(static_image_mode=True)
+
+def virtual_try_on(person_path, shirt_path):
+    # Load person image
+    person_img = cv2.imread(person_path)
+    if person_img is None:
+        print(f"❌ Failed to load person image: {person_path}")
+        return
+    h, w = person_img.shape[:2]
+
+    # Load shirt image with alpha
+    shirt_img = cv2.imread(shirt_path, cv2.IMREAD_UNCHANGED)
+    if shirt_img is None or shirt_img.shape[2] != 4:
+        print(f"❌ Failed to load shirt image or missing alpha: {shirt_path}")
+        return
+
+    # Detect pose
+    person_rgb = cv2.cvtColor(person_img, cv2.COLOR_BGR2RGB)
+    results = pose.process(person_rgb)
+    if not results.pose_landmarks:
+        print("❌ No pose landmarks detected.")
+        return
+
+    # Get body landmarks
+    lm = results.pose_landmarks.landmark
+    def get_xy(l): return np.array([int(l.x * w), int(l.y * h)])
+    r_shoulder = get_xy(lm[mp_pose.PoseLandmark.RIGHT_SHOULDER])
+    l_shoulder = get_xy(lm[mp_pose.PoseLandmark.LEFT_SHOULDER])
+    r_hip = get_xy(lm[mp_pose.PoseLandmark.RIGHT_HIP])
+    l_hip = get_xy(lm[mp_pose.PoseLandmark.LEFT_HIP])
+
+    # Define transformation
+    dst_pts = np.float32([r_shoulder, l_shoulder, l_hip, r_hip])
+    sh, sw = shirt_img.shape[:2]
+    src_pts = np.float32([[sw, 4], [2,0], [0, sh], [sw, sh]])
+
+    # Warp shirt
+    M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+    warped_shirt = cv2.warpPerspective(shirt_img, M, (w, h))
+
+    # Blend using alpha
+    alpha = warped_shirt[:, :, 3] / 255.0
+    alpha = alpha[:, :, np.newaxis]
+    final_output = (alpha * warped_shirt[:, :, :3] + (1 - alpha) * person_img).astype(np.uint8)
+
+    # Show final result
+    cv2.imshow("Virtual Try-On Result", final_output)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+# === RUN SCRIPT ===
+virtual_try_on(PERSON_IMAGE_PATH, SHIRT_IMAGE_PATH)
